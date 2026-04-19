@@ -3,7 +3,13 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Pandea — Tienda de Ropa</title>
+  <title>Pandea — Tienda de Ropa | Moda Consciente Colombia</title>
+  <meta name="description" content="Pandea es una tienda de ropa colombiana con prendas hechas de materiales naturales y diseño atemporal. Colecciones para mujer, hombre y accesorios.">
+  <meta name="keywords" content="tienda ropa colombia, moda consciente, ropa mujer, ropa hombre, accesorios, pandea">
+  <meta property="og:title" content="Pandea — Tienda de Ropa Consciente">
+  <meta property="og:description" content="Prendas que definen tu esencia. Materiales naturales, diseño atemporal.">
+  <meta property="og:url" content="https://costesincelejo.github.io/pandea/">
+  <meta name="robots" content="index, follow">
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -803,6 +809,29 @@ const DB = {
   set: (k,v) => localStorage.setItem('pandea_'+k, JSON.stringify(v)),
 };
 
+// ══ BACKEND API ══
+const API_URL = 'https://pandea.onrender.com';
+const API = {
+  token() { return DB.get('api_token') || ''; },
+  headers() { return { 'Content-Type':'application/json', ...(this.token()?{Authorization:'Bearer '+this.token()}:{}) }; },
+  async post(path, body) {
+    const r = await fetch(API_URL+path, { method:'POST', headers:this.headers(), body:JSON.stringify(body) });
+    return r.json();
+  },
+  async get(path) {
+    const r = await fetch(API_URL+path, { headers:this.headers() });
+    return r.json();
+  },
+  async put(path, body) {
+    const r = await fetch(API_URL+path, { method:'PUT', headers:this.headers(), body:JSON.stringify(body) });
+    return r.json();
+  },
+  async del(path) {
+    const r = await fetch(API_URL+path, { method:'DELETE', headers:this.headers() });
+    return r.json();
+  },
+};
+
 const SIZES = ['XS','S','M','L','XL'];
 const fmt = n => '$' + Math.round(n).toLocaleString('es-CO');
 
@@ -880,23 +909,31 @@ function switchTab(tab) {
 }
 
 // ══ LOGIN ══
-function doLogin() {
+async function doLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const pass  = document.getElementById('loginPassword').value;
   const err   = document.getElementById('loginError');
   err.classList.remove('show');
   if (!email||!pass) { err.textContent='Completa todos los campos.'; err.classList.add('show'); return; }
-  const users = DB.get('users')||[];
-  const user  = users.find(u=>u.email===email&&u.password===pass);
-  if (!user) { err.textContent='Correo o contraseña incorrectos.'; err.classList.add('show'); return; }
-  currentUser = user; DB.set('session', user);
-  closeModal('authModal'); updateNavAuth();
-  logActivity(user.email,'Inició sesión','success');
-  showToast('¡Bienvenido/a, '+user.nombre+'!');
+  try {
+    const data = await API.post('/api/auth/login', { email, password:pass });
+    if (data.error) { err.textContent=data.error; err.classList.add('show'); return; }
+    DB.set('api_token', data.token);
+    currentUser = data.user; DB.set('session', data.user);
+    closeModal('authModal'); updateNavAuth();
+    showToast('¡Bienvenido/a, '+data.user.nombre+'!');
+  } catch(e) {
+    const users = DB.get('users')||[];
+    const user  = users.find(u=>u.email===email&&u.password===pass);
+    if (!user) { err.textContent='Correo o contraseña incorrectos.'; err.classList.add('show'); return; }
+    currentUser = user; DB.set('session', user);
+    closeModal('authModal'); updateNavAuth();
+    showToast('¡Bienvenido/a, '+user.nombre+'!');
+  }
 }
 
 // ══ REGISTER ══
-function doRegister() {
+async function doRegister() {
   const f = id => document.getElementById(id).value.trim();
   const nombre=f('regNombre'),apellido=f('regApellido'),documento=f('regDoc'),email=f('regEmail'),
         password=document.getElementById('regPassword').value,
@@ -907,14 +944,22 @@ function doRegister() {
   err.classList.remove('show');
   if (!nombre||!apellido||!documento||!email||!password) { err.textContent='Los campos * son obligatorios.'; err.classList.add('show'); return; }
   if (password.length<6) { err.textContent='Contraseña mínimo 6 caracteres.'; err.classList.add('show'); return; }
-  const users = DB.get('users')||[];
-  if (users.find(u=>u.email===email)) { err.textContent='Este correo ya está registrado.'; err.classList.add('show'); return; }
-  const newUser = { id:Date.now(),nombre,apellido,tipoDoc,documento,email,password,edad:parseInt(edad)||0,ciudad,direccion,rol:'cliente',fechaRegistro:new Date().toISOString() };
-  users.push(newUser); DB.set('users',users);
-  currentUser=newUser; DB.set('session',newUser);
-  closeModal('authModal'); updateNavAuth();
-  logActivity(email,'Se registró','success');
-  showToast('¡Cuenta creada! Bienvenido/a, '+nombre);
+  try {
+    const data = await API.post('/api/auth/register', {nombre,apellido,tipoDoc,documento,email,password,edad,ciudad,direccion});
+    if (data.error) { err.textContent=data.error; err.classList.add('show'); return; }
+    DB.set('api_token', data.token);
+    currentUser=data.user; DB.set('session',data.user);
+    closeModal('authModal'); updateNavAuth();
+    showToast('¡Cuenta creada! Bienvenido/a, '+data.user.nombre);
+  } catch(e) {
+    const users = DB.get('users')||[];
+    if (users.find(u=>u.email===email)) { err.textContent='Este correo ya está registrado.'; err.classList.add('show'); return; }
+    const newUser = { id:Date.now(),nombre,apellido,tipoDoc,documento,email,password,edad:parseInt(edad)||0,ciudad,direccion,rol:'cliente',fechaRegistro:new Date().toISOString() };
+    users.push(newUser); DB.set('users',users);
+    currentUser=newUser; DB.set('session',newUser);
+    closeModal('authModal'); updateNavAuth();
+    showToast('¡Cuenta creada! Bienvenido/a, '+nombre);
+  }
 }
 
 // ══ RECOVER ══
