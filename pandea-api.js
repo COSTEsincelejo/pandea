@@ -16,7 +16,7 @@
  * ─────────────────────────────────────────────────────────────
  */
 
-const API_URL = "http://localhost:5000"; // ← Cambia en producción
+const API_URL = "https://pandea-production.up.railway.app"; // ← Cambia en producción
 
 // ── Token helpers ────────────────────────────────────────────
 const Auth = {
