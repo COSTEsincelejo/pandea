@@ -15,8 +15,8 @@
  * el código viejo no rompa mientras migras.
  * ─────────────────────────────────────────────────────────────
  */
-
-const API_URL = "https://pandea-production.up.railway.app"; // ← Cambia en producción
+const API_URL = "https://pandea-production.up.railway.app";
+ // ← Cambia en producción
 
 // ── Token helpers ────────────────────────────────────────────
 const Auth = {
