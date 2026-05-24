@@ -742,6 +742,12 @@ def admin_activity():
 def health():
     return jsonify({"status": "ok", "service": "Pandea API", "version": "1.0.0"})
 
+WHATSAPP_NUMBER = os.environ.get("WHATSAPP_NUMBER", "573017056143")
+
+@app.route("/api/config/whatsapp", methods=["GET"])
+def get_whatsapp():
+    return jsonify({"number": WHATSAPP_NUMBER})
+
 
 # ─────────────────────────── Run ──────────────────────────────
 if __name__ == "__main__":
