@@ -1,139 +1,279 @@
-# Pandea — Backend API
+# Pandea — Fullstack React + Node + SQL Server
 
-Backend REST para la tienda **Pandea**, construido con **Python + Flask + SQLite**.  
-Reemplaza completamente el `localStorage` del frontend con una API real y persistente.
+**Pandea** es una plataforma de comercio electrónico para una microempresa textil. El proyecto está dividido en:
+
+- `backend/`: API construida con Node.js, Express y SQL Server.
+- `frontend/`: cliente SPA en React usando Vite.
+- `database/`: esquema SQL Server con tablas, procedimientos almacenados y datos de ejemplo.
 
 ---
 
-## 🚀 Instalación
+## 📌 Qué hace el proyecto
+
+### Backend
+- Gestiona autenticación y autorización con JWT.
+- Crea usuarios, valida sesiones y protege rutas con middleware.
+- Ofrece catálogo de productos y detalles de producto.
+- Permite crear pedidos desde el carrito.
+- No gestiona pagos en línea; el pedido se confirma por WhatsApp.
+- El cliente puede pulsar "Comprar por WhatsApp" desde la ficha del producto o el carrito y abrir el chat con el vendedor.
+- Incluye operaciones administrativas para:
+  - gestión de usuarios
+  - gestión de productos
+  - gestión de pedidos
+  - gestión de cupones
+  - estadísticas y actividad del panel admin
+
+### Frontend
+- Presenta un catálogo de productos navegable.
+- Permite registro e inicio de sesión.
+- Administra carrito de compras y checkout.
+- Muestra perfil de usuario y pedidos realizados.
+- Incluye un panel admin básico para ver estadísticas y gestionar recursos.
+
+---
+
+## 🧱 Arquitectura del proyecto
+
+### Backend
+- `backend/src/app.js`: punto de entrada del servidor Express.
+- `backend/src/routes/`: define rutas por dominio (`auth`, `products`, `orders`, `users`, `admin`).
+- `backend/src/controllers/`: maneja la lógica de cada ruta.
+- `backend/src/services/`: contiene la lógica de negocio entre controladores y modelos.
+- `backend/src/models/`: ejecuta consultas SQL y procedimientos almacenados.
+- `backend/src/config/db.js`: configuración de conexión a SQL Server.
+- `backend/.env`: variables de entorno para la base de datos, JWT y puerto.
+
+### Frontend
+- `frontend/src/main.jsx`: arranca la app React.
+- `frontend/src/App.jsx`: define las rutas del frontend.
+- `frontend/src/context/`: administra estado de autenticación y carrito.
+- `frontend/src/services/`: encapsula llamadas HTTP al backend.
+- `frontend/src/pages/`: páginas principales del cliente.
+- `frontend/src/components/`: componentes reutilizables.
+- `frontend/src/api/client.js`: instancia Axios con baseURL y token.
+
+---
+
+## 📁 Estructura de carpetas
+
+### Raíz
+- `README.md`: documentación del proyecto.
+- `database/pandea_schema.sql`: esquema SQL Server.
+- `frontend/`: cliente React.
+- `backend/`: servidor Node.
+
+### Frontend
+- `frontend/src/pages`: páginas navegables.
+- `frontend/src/components`: tarjetas, barra de navegación, etc.
+- `frontend/src/context`: Auth y Cart.
+- `frontend/src/services`: llamadas a API.
+- `frontend/src/api/client.js`: Axios configurado.
+
+### Backend
+- `backend/src/routes`: definición de rutas.
+- `backend/src/controllers`: lógica de respuesta HTTP.
+- `backend/src/services`: reglas de negocio.
+- `backend/src/models`: acceso a datos SQL.
+- `backend/src/config/db.js`: configuración de SQL Server.
+
+---
+
+## ⚙️ Requisitos
+
+- Node.js >= 18
+- SQL Server disponible (local, Docker o en la nube)
+- Navegador moderno para el frontend
+
+---
+
+## 🚀 Cómo ejecutar
+
+### 1. Preparar la base de datos SQL Server
+
+Usa `database/pandea_schema.sql` para crear la base de datos y las tablas.
+
+Ejemplo con SQL Server Management Studio o `sqlcmd`:
+
+```sql
+USE master;
+GO
+:r database/pandea_schema.sql
+```
+
+### 2. Ejecutar el backend
 
 ```bash
-# 1. Clonar / entrar al directorio
-cd pandea-backend
-
-# 2. Crear entorno virtual (opcional pero recomendado)
-python3 -m venv venv
-source venv/bin/activate   # Linux/Mac
-# venv\Scripts\activate    # Windows
-
-# 3. Instalar dependencias
-pip install -r requirements.txt
-
-# 4. Configurar variables de entorno
+cd /workspaces/pandea/backend
+npm install
 cp .env.example .env
-# Editar .env con tu SECRET_KEY
-
-# 5. Iniciar el servidor
-python app.py
+# Edita backend/.env con tus credenciales de SQL Server
+npm run dev
 ```
 
-El servidor arranca en **http://localhost:5000** y crea automáticamente la base de datos `pandea.db` con productos y cupones de ejemplo.
+El backend quedará en `http://localhost:4000`.
+
+### 3. Ejecutar el frontend
+
+```bash
+cd /workspaces/pandea/frontend
+npm install
+cp .env.example .env
+npm run dev
+```
+
+El frontend quedará en `http://localhost:5173`.
 
 ---
 
-## 🔌 Conectar el frontend
+## 🧪 Pruebas y CI
 
-En el `index.html`, cambia la constante `API_URL` al inicio del script:
+### Backend
 
-```js
-const API_URL = "http://localhost:5000";
+```bash
+cd /workspaces/pandea/backend
+npm test
 ```
 
-Y reemplaza las llamadas a `DB.get` / `DB.set` por llamadas `fetch` a la API.
+### Frontend
+
+```bash
+cd /workspaces/pandea/frontend
+npm test
+```
+
+El repositorio también incluye un workflow de GitHub Actions en `.github/workflows/ci.yml` que ejecuta las pruebas de backend y frontend y valida la compilación del frontend.
 
 ---
 
-## 📋 Endpoints
+## 🔐 Variables de entorno
 
-### Auth
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| POST | `/api/auth/register` | Registrar usuario |
-| POST | `/api/auth/login` | Iniciar sesión |
-| POST | `/api/auth/recover` | Recuperar contraseña (envía token) |
-| POST | `/api/auth/reset-password` | Resetear contraseña con token |
+### `backend/.env`
 
-### Usuario autenticado
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| GET | `/api/users/me` | Ver perfil propio |
-| PUT | `/api/users/me` | Actualizar perfil |
-| GET | `/api/users/me/orders` | Mis pedidos |
+- `PORT`: puerto del servidor backend.
+- `JWT_SECRET`: clave secreta para firmar tokens JWT.
+- `DB_SERVER`: host de SQL Server.
+- `DB_USER`: usuario SQL.
+- `DB_PASSWORD`: contraseña SQL.
+- `DB_NAME`: nombre de la base de datos.
+- `DB_PORT`: puerto SQL Server.
+- `WHATSAPP_NUMBER`: número de WhatsApp usado en la app.
+- `NODE_ENV`: modo de ejecución.
 
-### Productos (público)
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| GET | `/api/products` | Todos los productos |
-| GET | `/api/products?categoria=mujer` | Filtrar por categoría |
-| GET | `/api/products/:id` | Detalle de producto |
+### `frontend/.env`
+
+- `VITE_API_URL`: URL base de la API (`http://localhost:4000/api`).
+
+---
+
+## 📦 Endpoints del backend
+
+### Autenticación
+
+- `POST /api/auth/register`
+  - Registra un usuario.
+  - Payload esperado:
+    - `nombre`, `apellido`, `email`, `password`, `documento`.
+
+- `POST /api/auth/login`
+  - Inicia sesión y devuelve un token JWT.
+  - Payload esperado: `email`, `password`.
+
+- `POST /api/auth/recover`
+  - Inicia el flujo de recuperación de contraseña.
+  - Payload esperado: `email`.
+
+### Usuario
+
+- `GET /api/users/me`
+  - Devuelve información del usuario autenticado.
+
+- `PUT /api/users/me`
+  - Actualiza el perfil del usuario.
+
+- `GET /api/users/me/orders`
+  - Lista los pedidos del usuario autenticado.
+
+### Productos
+
+- `GET /api/products`
+  - Obtiene todos los productos.
+
+- `GET /api/products/:id`
+  - Obtiene el detalle de un producto.
 
 ### Pedidos
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| POST | `/api/orders` | Crear pedido (auth required) |
 
-### Cupones
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| POST | `/api/coupons/validate` | Validar cupón |
+- `POST /api/orders`
+  - Crea un nuevo pedido.
+  - Requiere autorización Bearer token.
+  - Payload esperado:
+    - `items`, `subtotal`, `total`, `metodo_contacto`, `couponCode` (opcional).
 
-### Admin (requiere rol admin)
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| GET | `/api/admin/stats` | Estadísticas del dashboard |
-| GET | `/api/admin/activity` | Log de actividad |
-| GET/POST | `/api/admin/products` | Listar / crear productos |
-| PUT/DELETE | `/api/admin/products/:id` | Editar / eliminar producto |
-| GET | `/api/admin/users` | Listar usuarios |
-| DELETE | `/api/admin/users/:id` | Eliminar usuario |
-| PUT | `/api/admin/users/:id/role` | Cambiar rol |
-| GET | `/api/admin/orders` | Todos los pedidos |
-| PUT | `/api/admin/orders/:id` | Cambiar estado del pedido |
-| DELETE | `/api/admin/orders/:id` | Eliminar pedido |
-| GET/POST | `/api/admin/coupons` | Listar / crear cupones |
-| PUT/DELETE | `/api/admin/coupons/:id` | Editar / eliminar cupón |
+### Admin (requiere token admin)
 
----
-
-## 🔐 Autenticación
-
-Todas las rutas protegidas requieren un header:
-
-```
-Authorization: Bearer <token>
-```
-
-El token se obtiene en el login/registro y dura **7 días**.
-
-### Crear primer admin
-
-```bash
-# Registra un usuario normal y luego actualiza su rol en SQLite:
-sqlite3 pandea.db "UPDATE users SET rol='admin' WHERE email='tu@email.com';"
-```
+- `GET /api/admin/stats`
+- `GET /api/admin/activity`
+- `GET /api/admin/users`
+- `DELETE /api/admin/users/:id`
+- `PUT /api/admin/users/:id/role`
+- `GET /api/admin/products`
+- `POST /api/admin/products`
+- `PUT /api/admin/products/:id`
+- `DELETE /api/admin/products/:id`
+- `GET /api/admin/orders`
+- `PUT /api/admin/orders/:id`
+- `DELETE /api/admin/orders/:id`
+- `GET /api/admin/coupons`
+- `POST /api/admin/coupons`
+- `PUT /api/admin/coupons/:id`
+- `DELETE /api/admin/coupons/:id`
 
 ---
 
-## 📦 Estructura del proyecto
+## 🧩 Flujo de uso principal
 
-```
-pandea-backend/
-├── app.py              ← Aplicación principal (Flask)
-├── pandea.db           ← Base de datos SQLite (se crea automáticamente)
-├── requirements.txt    ← Dependencias Python
-├── .env.example        ← Variables de entorno de ejemplo
-└── README.md           ← Este archivo
-```
+1. El cliente carga el catálogo desde `GET /api/products`.
+2. El usuario se registra o inicia sesión.
+3. El usuario agrega productos al carrito.
+4. El usuario completa checkout y crea un pedido en `POST /api/orders`.
+5. El admin puede revisar estadísticas, pedidos y gestionar productos.
 
 ---
 
-## 🏭 Producción
+## 📝 Notas importantes
 
-Para producción, usa **Gunicorn** como servidor WSGI:
+- El frontend usa el token almacenado en `localStorage` para autorizar solicitudes.
+- El backend usa JWT con firma y expiración de 7 días.
+- Las operaciones admin están protegidas con middleware que valida `rol === 'admin'`.
+- La base de datos SQL Server se crea y se gestiona por `database/pandea_schema.sql`.
 
-```bash
-pip install gunicorn
-gunicorn -w 4 -b 0.0.0.0:5000 app:app
-```
+---
 
-Para deploy rápido considera **Railway**, **Render** o **Fly.io** — todos soportan Python/Flask y SQLite.
+## 🎯 Características implementadas
+
+- Autenticación con JWT
+- CRUD de productos
+- Carrito y checkout
+- Validación de pedidos con cupones
+- Panel admin con estadísticas
+- Frontend SPA en React con rutas protegidas
+- Conexión segura a SQL Server con `mssql`
+
+---
+
+## 📌 Recomendaciones para producción
+
+- Usa variables de entorno seguras.
+- Crea un usuario administrador en la tabla `usuarios`.
+- Haz un backup de la base de datos antes de hacer cambios.
+- Considera agregar tests automatizados y un CI/CD.
+
+---
+
+## 📌 Próximos pasos sugeridos
+
+- Añadir UI de administración avanzada: edición de cupones y usuarios.
+- Crear `docker-compose` para backend + SQL Server + frontend.
+- Agregar pruebas unitarias e integración.
+- Añadir un flujo real de pago / pasarela.

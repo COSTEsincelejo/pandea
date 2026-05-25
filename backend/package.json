@@ -1,0 +1,33 @@
+{
+  "name": "pandea-backend",
+  "version": "1.0.0",
+  "description": "Backend API de PANDEA para la gestión de ventas de la microempresa textil.",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "test": "jest --runInBand",
+    "test:watch": "jest --watchAll"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.4",
+    "express-validator": "^7.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "mssql": "^12.5.4"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.1",
+    "supertest": "^6.4.2"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": ["**/tests/**/*.test.js"]
+  }
+}

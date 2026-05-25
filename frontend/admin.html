@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pandea — Panel Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --purple:#7B2FBE; --blue:#0066FF;
+    --grad:linear-gradient(135deg,#7B2FBE 0%,#0066FF 100%);
+    --white:#FFFFFF; --dark:#0A0A0A; --text:#1A1A1A;
+    --gray:#F8F5FF; --border:#E8E0F5;
+    --green:#22C55E; --red:#EF4444; --yellow:#F59E0B;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans',sans-serif;background:#F3F0FA;color:var(--text);min-height:100vh;}
+  button,input{font:inherit;}
+
+  /* ── LOGIN ── */
+  #login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--grad);}
+  .login-box{background:white;border-radius:20px;padding:40px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.2);}
+  .login-box h1{font-size:24px;font-weight:700;margin-bottom:6px;}
+  .login-box p{color:#666;font-size:14px;margin-bottom:28px;}
+  .inp{width:100%;padding:12px 16px;border:2px solid var(--border);border-radius:10px;font-family:inherit;font-size:14px;outline:none;transition:.2s;}
+  .inp:focus{border-color:var(--purple);}
+  .inp+.inp{margin-top:12px;}
+  .btn-login{width:100%;padding:14px;background:var(--grad);color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;margin-top:20px;transition:.2s;}
+  .btn-login:hover{opacity:.9;}
+  .login-err{color:var(--red);font-size:13px;margin-top:10px;display:none;}
+
+  /* ── LAYOUT ── */
+  #app{display:none;}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:220px;background:white;border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;}
+  .sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);font-size:20px;font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .sidebar-logo span{display:block;font-size:11px;color:#888;-webkit-text-fill-color:#888;margin-top:2px;font-weight:400;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:12px 20px;cursor:pointer;font-size:14px;font-weight:500;color:#555;transition:.15s;border-left:3px solid transparent;}
+  .nav-item:hover{background:var(--gray);color:var(--purple);}
+  .nav-item.active{background:var(--gray);color:var(--purple);border-left-color:var(--purple);}
+  .nav-icon{font-size:18px;width:22px;text-align:center;}
+  .sidebar-footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border);}
+  .logout-btn{width:100%;padding:10px;background:var(--gray);border:none;border-radius:8px;cursor:pointer;font-size:13px;color:#555;font-weight:500;}
+  .logout-btn:hover{background:#ede8f8;}
+  .main{margin-left:220px;padding:28px;min-height:100vh;}
+  .page-title{font-size:22px;font-weight:700;margin-bottom:6px;}
+  .page-sub{font-size:13px;color:#888;margin-bottom:24px;}
+
+  /* ── STATS ── */
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+  .stat-card{background:white;border-radius:14px;padding:20px;box-shadow:0 2px 12px rgba(123,47,190,.07);}
+  .stat-label{font-size:12px;color:#888;font-weight:500;text-transform:uppercase;letter-spacing:.5px;}
+  .stat-value{font-size:28px;font-weight:700;margin:6px 0 0;color:var(--dark);}
+  .stat-icon{font-size:28px;float:right;margin-top:-4px;}
+
+  /* ── TABLE ── */
+  .card{background:white;border-radius:14px;padding:24px;box-shadow:0 2px 12px rgba(123,47,190,.07);margin-bottom:20px;}
+  .card-title{font-size:16px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .refresh-btn{margin-left:auto;padding:6px 14px;background:var(--gray);border:none;border-radius:8px;cursor:pointer;font-size:12px;color:var(--purple);font-weight:500;}
+  .refresh-btn:hover{background:#ede8f8;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{text-align:left;padding:10px 12px;background:var(--gray);color:#666;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.4px;}
+  th:first-child{border-radius:8px 0 0 8px;}
+  th:last-child{border-radius:0 8px 8px 0;}
+  td{padding:12px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:#faf8ff;}
+  .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+  .badge-admin{background:#EDE8F8;color:var(--purple);}
+  .badge-cliente{background:#F0F9FF;color:#0369A1;}
+  .badge-pendiente{background:#FEF9C3;color:#A16207;}
+  .badge-procesando{background:#DBEAFE;color:#1D4ED8;}
+  .badge-enviado{background:#D1FAE5;color:#065F46;}
+  .badge-entregado{background:#D1FAE5;color:#065F46;}
+  .badge-cancelado{background:#FEE2E2;color:#991B1B;}
+  .empty{text-align:center;padding:40px;color:#aaa;font-size:14px;}
+  .loading{text-align:center;padding:30px;color:#bbb;font-size:13px;}
+  .activity-item{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border);}
+  .activity-item:last-child{border-bottom:none;}
+  .activity-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+  .dot-success{background:var(--green);}
+  .dot-info{background:var(--blue);}
+  .dot-warning{background:var(--yellow);}
+  .dot-error{background:var(--red);}
+  .activity-text{font-size:13px;}
+  .activity-email{font-weight:600;color:var(--purple);}
+  .activity-time{font-size:11px;color:#aaa;margin-top:2px;}
+  .section{display:none;}
+  .section.active{display:block;}
+  #toast{position:fixed;bottom:24px;right:24px;background:var(--dark);color:white;padding:12px 20px;border-radius:10px;font-size:13px;opacity:0;transition:.3s;pointer-events:none;z-index:999;}
+  #toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<div id="login-screen">
+  <div class="login-box">
+    <h1>🌿 Pandea Admin</h1>
+    <p>Inicia sesión con tu cuenta de administrador</p>
+    <input class="inp" id="email" type="email" placeholder="Correo electrónico" value="test@test.com"/>
+    <input class="inp" id="password" type="password" placeholder="Contraseña" value="123456"/>
+    <button class="btn-login" onclick="doLogin()">Ingresar al panel</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+<div id="app">
+  <div class="sidebar">
+    <div class="sidebar-logo">Pandea<span>Panel de Administración</span></div>
+    <div class="nav-item active" onclick="showSection('dashboard')" id="nav-dashboard"><span class="nav-icon">📊</span> Dashboard</div>
+    <div class="nav-item" onclick="showSection('users')" id="nav-users"><span class="nav-icon">👥</span> Usuarios</div>
+    <div class="nav-item" onclick="showSection('orders')" id="nav-orders"><span class="nav-icon">🛒</span> Pedidos</div>
+    <div class="nav-item" onclick="showSection('products')" id="nav-products"><span class="nav-icon">👔</span> Productos</div>
+    <div class="nav-item" onclick="showSection('activity')" id="nav-activity"><span class="nav-icon">📋</span> Actividad</div>
+    <div class="sidebar-footer"><button class="logout-btn" onclick="logout()">🚪 Cerrar sesión</button></div>
+  </div>
+  <div class="main">
+    <div class="section active" id="section-dashboard">
+      <div class="page-title">Dashboard</div>
+      <div class="page-sub" id="welcome-msg">Bienvenido al panel de administración</div>
+      <div class="stats-grid">
+        <div class="stat-card"><span class="stat-icon">👥</span><div class="stat-label">Usuarios</div><div class="stat-value" id="stat-users">—</div></div>
+        <div class="stat-card"><span class="stat-icon">📦</span><div class="stat-label">Productos</div><div class="stat-value" id="stat-products">—</div></div>
+        <div class="stat-card"><span class="stat-icon">🛒</span><div class="stat-label">Pedidos</div><div class="stat-value" id="stat-orders">—</div></div>
+        <div class="stat-card"><span class="stat-icon">💰</span><div class="stat-label">Ingresos</div><div class="stat-value" id="stat-revenue">—</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 Actividad reciente <button class="refresh-btn" onclick="loadActivity()">↻ Actualizar</button></div>
+        <div id="activity-dash"></div>
+      </div>
+    </div>
+    <div class="section" id="section-users">
+      <div class="page-title">Usuarios registrados</div>
+      <div class="page-sub">Todas las personas que se han registrado en Pandea</div>
+      <div class="card"><div class="card-title">👥 Usuarios <button class="refresh-btn" onclick="loadUsers()">↻ Actualizar</button></div><div id="users-table"><div class="loading">Cargando...</div></div></div>
+    </div>
+    <div class="section" id="section-orders">
+      <div class="page-title">Pedidos</div>
+      <div class="page-sub">Historial de todas las compras realizadas</div>
+      <div class="card"><div class="card-title">🛒 Pedidos <button class="refresh-btn" onclick="loadOrders()">↻ Actualizar</button></div><div id="orders-table"><div class="loading">Cargando...</div></div></div>
+    </div>
+    <div class="section" id="section-products">
+      <div class="page-title">Productos</div>
+      <div class="page-sub">Catálogo de productos y stock disponible</div>
+      <div class="card"><div class="card-title">👔 Productos <button class="refresh-btn" onclick="loadProducts()">↻ Actualizar</button></div><div id="products-table"><div class="loading">Cargando...</div></div></div>
+    </div>
+    <div class="section" id="section-activity">
+      <div class="page-title">Registro de Actividad</div>
+      <div class="page-sub">Últimas acciones realizadas en el sistema</div>
+      <div class="card"><div class="card-title">📋 Actividad <button class="refresh-btn" onclick="loadActivity()">↻ Actualizar</button></div><div id="activity-full"></div></div>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+<script>
+const API = window.location.origin;
+let TOKEN = localStorage.getItem('pandea_admin_token') || '';
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(window.toastTimeout);
+  window.toastTimeout = setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+function buildHeaders(custom){
+  const headers = {'Content-Type':'application/json', ...custom};
+  if(TOKEN) headers.Authorization = 'Bearer '+TOKEN;
+  return headers;
+}
+
+async function api(path, opts={}){
+  try{
+    const res = await fetch(API + path, {...opts, headers: buildHeaders(opts.headers || {})});
+    const data = await res.json().catch(()=>({error:'Respuesta inválida del servidor'}));
+    if(!res.ok) throw new Error(data.error || data.message || 'Error en la API');
+    return data;
+  }catch(error){
+    throw new Error(error.message || 'Error de conexión');
+  }
+}
+
+async function doLogin(){
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const err = document.getElementById('login-err');
+  err.style.display='none';
+  try{
+    const data = await api('/api/auth/login',{method:'POST',body:JSON.stringify({email,password})});
+    if(data.user?.rol !== 'admin'){
+      err.textContent='Solo administradores pueden acceder.';
+      err.style.display='block';
+      return;
+    }
+    TOKEN = data.token;
+    localStorage.setItem('pandea_admin_token', TOKEN);
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    document.getElementById('welcome-msg').textContent='Bienvenido, '+data.user.nombre+' '+data.user.apellido;
+    loadAll();
+  }catch(e){
+    err.textContent = e.message || 'Error de conexión con el servidor.';
+    err.style.display='block';
+  }
+}
+
+function logout(){
+  TOKEN = '';
+  localStorage.removeItem('pandea_admin_token');
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+}
+
+function showSection(name){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('section-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  if(name==='users') loadUsers();
+  if(name==='orders') loadOrders();
+  if(name==='products') loadProducts();
+  if(name==='activity') loadActivity();
+}
+
+function formatNumber(value){
+  return new Intl.NumberFormat('es-CO').format(Number(value) || 0);
+}
+
+function formatMoney(value){
+  return '$'+formatNumber(value);
+}
+
+async function loadStats(){
+  try{
+    const d = await api('/api/admin/stats');
+    document.getElementById('stat-users').textContent = d.totalUsers ?? '—';
+    document.getElementById('stat-products').textContent = d.totalProducts ?? '—';
+    document.getElementById('stat-orders').textContent = d.totalOrders ?? '—';
+    document.getElementById('stat-revenue').textContent = formatMoney(d.revenue ?? 0);
+  }catch(e){
+    toast('No se pudieron cargar las estadísticas.');
+  }
+}
+
+async function loadUsers(){
+  const target = document.getElementById('users-table');
+  target.innerHTML='<div class="loading">Cargando usuarios...</div>';
+  try{
+    const users = await api('/api/admin/users');
+    if(!users.length){ target.innerHTML='<div class="empty">No hay usuarios registrados aún</div>'; return; }
+    let html = '<table><thead><tr><th>#</th><th>Nombre</th><th>Email</th><th>Documento</th><th>Ciudad</th><th>Rol</th><th>Registro</th></tr></thead><tbody>';
+    users.forEach(u=>{
+      const fecha = u.fecha_registro ? new Date(u.fecha_registro).toLocaleDateString('es-CO') : '—';
+      html += `<tr><td><b>${u.id}</b></td><td>${u.nombre} ${u.apellido}</td><td>${u.email}</td><td>${u.documento||'—'}</td><td>${u.ciudad||'—'}</td><td><span class="badge badge-${u.rol}">${u.rol}</span></td><td>${fecha}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    target.innerHTML = html;
+  }catch(e){
+    target.innerHTML = '<div class="empty">Error cargando usuarios.</div>';
+    toast(e.message);
+  }
+}
+
+async function loadOrders(){
+  const target = document.getElementById('orders-table');
+  target.innerHTML='<div class="loading">Cargando pedidos...</div>';
+  try{
+    const orders = await api('/api/admin/orders');
+    if(!orders.length){ target.innerHTML='<div class="empty">No hay pedidos aún</div>'; return; }
+    let html = '<table><thead><tr><th>ID</th><th>Cliente</th><th>Productos</th><th>Subtotal</th><th>Descuento</th><th>Total</th><th>Estado</th><th>Fecha</th></tr></thead><tbody>';
+    orders.forEach(o=>{
+      const items = Array.isArray(o.items) ? o.items : [];
+      const resumen = items.map(i=>`${i.nombre || i.name || 'Producto'} x${i.qty || i.quantity || 0}`).join(', ') || '—';
+      const fecha = o.fecha ? new Date(o.fecha).toLocaleDateString('es-CO') : '—';
+      html += `<tr><td><b style="font-size:11px">${o.id}</b></td><td>${o.user_name || '—'}</td><td style="max-width:200px;font-size:12px;color:#666">${resumen}</td><td>${formatMoney(o.subtotal)}</td><td>${o.discount_amt > 0 ? formatMoney(o.discount_amt) : '—'}</td><td><b>${formatMoney(o.total)}</b></td><td><span class="badge badge-${o.status}">${o.status}</span></td><td>${fecha}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    target.innerHTML = html;
+  }catch(e){
+    target.innerHTML = '<div class="empty">Error cargando pedidos.</div>';
+    toast(e.message);
+  }
+}
+
+async function loadProducts(){
+  const target = document.getElementById('products-table');
+  target.innerHTML='<div class="loading">Cargando productos...</div>';
+  try{
+    const products = await api('/api/admin/products');
+    if(!products.length){ target.innerHTML='<div class="empty">No hay productos disponibles</div>'; return; }
+    let html = '<table><thead><tr><th>#</th><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Stock Total</th><th>Nuevo</th></tr></thead><tbody>';
+    products.forEach(p=>{
+      const stockObj = typeof p.stock === 'object' ? p.stock : {};
+      const stock = Object.values(stockObj).reduce((sum, value) => sum + Number(value || 0), 0);
+      const stockColor = stock <= 5 ? 'var(--red)' : stock <= 15 ? 'var(--yellow)' : 'var(--green)';
+      html += `<tr><td><b>${p.id}</b></td><td>${p.nombre}</td><td>${p.categoria || '—'}</td><td><b>${formatMoney(p.precio)}</b></td><td><span style="color:${stockColor};font-weight:600">${stock} uds</span></td><td>${p.es_nuevo ? '✅ Sí' : '—'}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    target.innerHTML = html;
+  }catch(e){
+    target.innerHTML = '<div class="empty">Error cargando productos.</div>';
+    toast(e.message);
+  }
+}
+
+async function loadActivity(){
+  const targetDash = document.getElementById('activity-dash');
+  const targetFull = document.getElementById('activity-full');
+  targetDash.innerHTML = '<div class="loading">Cargando actividad...</div>';
+  targetFull.innerHTML = '<div class="loading">Cargando actividad...</div>';
+  try{
+    const rows = await api('/api/admin/activity');
+    if(!rows.length){
+      targetDash.innerHTML = '<div class="empty">Sin actividad reciente</div>';
+      targetFull.innerHTML = '<div class="empty">Sin actividad reciente</div>';
+      return;
+    }
+    const render = (list, container) => {
+      let html = '';
+      list.slice(0,20).forEach(a=>{
+        const dotClass = a.status === 'success' ? 'dot-success' : a.status === 'error' ? 'dot-error' : 'dot-info';
+        const fecha = a.fecha ? new Date(a.fecha).toLocaleString('es-CO') : '—';
+        html += `<div class="activity-item"><div class="activity-dot ${dotClass}"></div><div><div class="activity-text"><span class="activity-email">${a.user_email || 'Sistema'}</span> — ${a.action || 'Acción'}</div><div class="activity-time">${fecha}</div></div></div>`;
+      });
+      document.getElementById(container).innerHTML = html;
+    };
+    render(rows,'activity-dash');
+    render(rows,'activity-full');
+  }catch(e){
+    targetDash.innerHTML = '<div class="empty">Error cargando actividad.</div>';
+    targetFull.innerHTML = '<div class="empty">Error cargando actividad.</div>';
+    toast(e.message);
+  }
+}
+
+async function loadAll(){
+  await Promise.all([loadStats(), loadActivity()]);
+}
+
+async function init(){
+  if(!TOKEN) return;
+  try{
+    const user = await api('/api/users/me');
+    if(user.rol !== 'admin') throw new Error('No autorizado');
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    document.getElementById('welcome-msg').textContent='Bienvenido, '+user.nombre+' '+user.apellido;
+    loadAll();
+  }catch(e){
+    logout();
+  }
+}
+
+init();
+setInterval(() => { if(document.getElementById('app').style.display === 'block') loadStats(); }, 30000);
+</script>
+</body>
+</html>
