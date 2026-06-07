@@ -1,14 +1,11 @@
 import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'https://humble-umbrella-g46xv5jggqw72pg9-4000.app.github.dev/api';
-
+const API_URL = (import.meta.env.VITE_API_URL || 'https://pandea-production-c738.up.railway.app') + '/api';
 const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
 });
-
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('pandea_token');
   if (token) {
@@ -16,5 +13,4 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
-
 export default api;
