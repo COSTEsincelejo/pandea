@@ -5,8 +5,8 @@
 Pandea es una plataforma de comercio electrónico construida con una arquitectura de aplicación en capas:
 
 - `frontend/`: Single Page Application (SPA) en React + Vite.
-- `backend/`: API REST con Node.js, Express y conexión a SQL Server.
-- `database/`: esquema SQL Server con tablas y procedimientos almacenados.
+- `backend/`: API REST con Node.js, Express y conexión a PostgreSQL.
+- `database/`: esquema PostgreSQL con tablas y datos de ejemplo.
 
 Esta separación permite desarrollar y desplegar el cliente y el servidor de forma independiente.
 
@@ -27,9 +27,9 @@ El backend está diseñado con el patrón `routes → controllers → services �
 ### 1.2 Configuración de la base de datos
 
 - `backend/src/config/db.js`
-  - Usa el paquete `mssql` para conectar con SQL Server.
+  - Usa el paquete `pg` para conectar con PostgreSQL.
   - Lee variables de entorno desde `backend/.env`.
-  - Exporta funciones auxiliares para ejecutar consultas y procedimientos.
+  - Exporta funciones auxiliares para ejecutar consultas SQL.
 
 ### 1.3 Rutas (API)
 
@@ -197,8 +197,8 @@ El script define procedimientos para:
 
 ### 3.3 Relación entre capas
 
-- El backend no usa ORM; utiliza SQL directo con `mssql`.
-- Las propias consultas ejecutadas en los modelos son la única capa entre la API y SQL Server.
+- El backend no usa ORM; utiliza SQL directo con `pg`.
+- Las propias consultas ejecutadas en los modelos son la única capa entre la API y PostgreSQL.
 
 ---
 
@@ -206,7 +206,7 @@ El script define procedimientos para:
 
 1. El usuario accede desde el navegador al frontend React.
 2. El frontend solicita productos y datos de usuario a la API.
-3. El backend procesa la petición y consulta SQL Server.
+3. El backend procesa la petición y consulta PostgreSQL.
 4. El backend envía la respuesta JSON al frontend.
 5. El frontend actualiza el estado y renderiza la UI.
 
@@ -225,7 +225,7 @@ Las rutas protegidas usan JWT para asegurar que solo usuarios autenticados o adm
 
 ## 6. Recomendaciones de mejora
 
-- Agregar `docker-compose` para orquestar frontend, backend y SQL Server.
+- Agregar `docker-compose` para orquestar frontend, backend y PostgreSQL.
 - Añadir pruebas unitarias e integración para API y componentes.
 - Implementar validaciones y manejo de errores más robusto en frontend.
 - Añadir caching o paginación en endpoints de productos.

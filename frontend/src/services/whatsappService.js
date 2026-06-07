@@ -1,8 +1,13 @@
 import api from '../api/client.js';
 
 export async function getWhatsAppNumber() {
-  const response = await api.get('/config/whatsapp');
-  return response.data.number;
+  try {
+    const response = await api.get('/config/whatsapp');
+    if (response && response.data && response.data.number) return response.data.number;
+  } catch (err) {
+    // ignore and fallback
+  }
+  return '573017056143';
 }
 
 export function formatWhatsappMessage(product) {
@@ -39,5 +44,6 @@ export function formatCartWhatsappMessage(items, subtotal, couponCode = '') {
 
 export function buildWhatsappUrl(number, message) {
   const cleaned = String(number).replace(/[^0-9]/g, '');
-  return `https://api.whatsapp.com/send?phone=${cleaned}&text=${message}`;
+  // Use wa.me short link with text parameter; message is expected pre-encoded
+  return `https://wa.me/${cleaned}?text=${message}`;
 }

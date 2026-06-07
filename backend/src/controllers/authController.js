@@ -43,8 +43,35 @@ async function recover(req, res, next) {
   }
 }
 
+async function validateResetToken(req, res, next) {
+  try {
+    const { token } = req.params;
+    const result = await authService.validateResetToken(token);
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function resetPassword(req, res, next) {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const { token } = req.params;
+    const { password } = req.body;
+    const result = await authService.resetPassword(token, password);
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   register,
   login,
   recover,
+  validateResetToken,
+  resetPassword,
 };

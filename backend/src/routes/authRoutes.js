@@ -31,4 +31,17 @@ router.post(
   authController.recover
 );
 
+router.get(
+  '/reset-password/validate/:token',
+  authController.validateResetToken
+);
+
+router.post(
+  '/reset-password/:token',
+  [
+    body('password').isLength({ min: 8 }).withMessage('La contraseña debe tener al menos 8 caracteres'),
+  ],
+  authController.resetPassword
+);
+
 module.exports = router;

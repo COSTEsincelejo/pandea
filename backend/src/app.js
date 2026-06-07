@@ -6,6 +6,8 @@ const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const stockRoutes = require('./routes/stockRoutes');
+const expenseRoutes = require('./routes/expenseRoutes');
 const { errorHandler } = require('./middleware/errorHandler');
 
 dotenv.config();
@@ -13,7 +15,10 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.use(cors());
+app.use(cors({
+  origin: true,
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -22,6 +27,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/stock', stockRoutes);
+app.use('/api/expenses', expenseRoutes);
 
 app.get('/api/config/whatsapp', (req, res) => {
   return res.json({ number: process.env.WHATSAPP_NUMBER || '573017056143' });

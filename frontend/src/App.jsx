@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { CartProvider } from './context/CartContext.jsx';
 import NavBar from './components/NavBar.jsx';
+import Footer from './components/Footer.jsx';
 import HomePage from './pages/HomePage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
@@ -10,6 +11,12 @@ import CheckoutPage from './pages/CheckoutPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
 import ProductDetailPage from './pages/ProductDetailPage.jsx';
 import AdminDashboardPage from './pages/AdminDashboardPage.jsx';
+import OrderHistoryPage from './pages/OrderHistoryPage.jsx';
+import ForgotPasswordPage from './pages/ForgotPasswordPage.jsx';
+import ResetPasswordPage from './pages/ResetPasswordPage.jsx';
+import InventoryPage from './pages/admin/InventoryPage.jsx';
+import ExpensesPage from './pages/admin/ExpensesPage.jsx';
+import ReportsPage from './pages/admin/ReportsPage.jsx';
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
@@ -38,6 +45,8 @@ export default function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
               <Route path="/cart" element={<CartPage />} />
               <Route
                 path="/checkout"
@@ -55,6 +64,14 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/profile/historial"
+                element={
+                  <ProtectedRoute>
+                    <OrderHistoryPage />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/product/:id" element={<ProductDetailPage />} />
               <Route
                 path="/admin"
@@ -64,9 +81,34 @@ export default function App() {
                   </AdminRoute>
                 }
               />
+              <Route
+                path="/admin/inventory"
+                element={
+                  <AdminRoute>
+                    <InventoryPage />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/expenses"
+                element={
+                  <AdminRoute>
+                    <ExpensesPage />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/reports"
+                element={
+                  <AdminRoute>
+                    <ReportsPage />
+                  </AdminRoute>
+                }
+              />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
+          <Footer />
         </BrowserRouter>
       </CartProvider>
     </AuthProvider>

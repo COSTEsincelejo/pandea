@@ -1,10 +1,10 @@
-# Pandea — Fullstack React + Node + SQL Server
+# Pandea — Fullstack React + Node + PostgreSQL
 
 **Pandea** es una plataforma de comercio electrónico para una microempresa textil. El proyecto está dividido en:
 
-- `backend/`: API construida con Node.js, Express y SQL Server.
+- `backend/`: API construida con Node.js, Express y PostgreSQL.
 - `frontend/`: cliente SPA en React usando Vite.
-- `database/`: esquema SQL Server con tablas, procedimientos almacenados y datos de ejemplo.
+- `database/`: esquema PostgreSQL con tablas y datos de ejemplo.
 
 ---
 
@@ -40,8 +40,8 @@
 - `backend/src/routes/`: define rutas por dominio (`auth`, `products`, `orders`, `users`, `admin`).
 - `backend/src/controllers/`: maneja la lógica de cada ruta.
 - `backend/src/services/`: contiene la lógica de negocio entre controladores y modelos.
-- `backend/src/models/`: ejecuta consultas SQL y procedimientos almacenados.
-- `backend/src/config/db.js`: configuración de conexión a SQL Server.
+- `backend/src/models/`: ejecuta consultas SQL.
+- `backend/src/config/db.js`: configuración de conexión a PostgreSQL.
 - `backend/.env`: variables de entorno para la base de datos, JWT y puerto.
 
 ### Frontend
@@ -59,7 +59,7 @@
 
 ### Raíz
 - `README.md`: documentación del proyecto.
-- `database/pandea_schema.sql`: esquema SQL Server.
+- `database/pandea_schema.sql`: esquema PostgreSQL.
 - `frontend/`: cliente React.
 - `backend/`: servidor Node.
 
@@ -75,30 +75,28 @@
 - `backend/src/controllers`: lógica de respuesta HTTP.
 - `backend/src/services`: reglas de negocio.
 - `backend/src/models`: acceso a datos SQL.
-- `backend/src/config/db.js`: configuración de SQL Server.
+- `backend/src/config/db.js`: configuración de PostgreSQL.
 
 ---
 
 ## ⚙️ Requisitos
 
 - Node.js >= 18
-- SQL Server disponible (local, Docker o en la nube)
+- PostgreSQL disponible (local, Docker o en la nube)
 - Navegador moderno para el frontend
 
 ---
 
 ## 🚀 Cómo ejecutar
 
-### 1. Preparar la base de datos SQL Server
+### 1. Preparar la base de datos PostgreSQL
 
 Usa `database/pandea_schema.sql` para crear la base de datos y las tablas.
 
-Ejemplo con SQL Server Management Studio o `sqlcmd`:
+Ejemplo con `psql`:
 
-```sql
-USE master;
-GO
-:r database/pandea_schema.sql
+```bash
+psql -U postgres -f database/pandea_schema.sql
 ```
 
 ### 2. Ejecutar el backend
@@ -107,7 +105,7 @@ GO
 cd /workspaces/pandea/backend
 npm install
 cp .env.example .env
-# Edita backend/.env con tus credenciales de SQL Server
+# Edita backend/.env con tus credenciales de PostgreSQL
 npm run dev
 ```
 
@@ -123,6 +121,24 @@ npm run dev
 ```
 
 El frontend quedará en `http://localhost:5173`.
+
+---
+
+## 🐳 Ejecutar con Docker
+
+Si no tienes PostgreSQL instalado localmente, esta es la forma más rápida y confiable para tu presentación.
+
+```bash
+cd /workspaces/pandea
+docker compose up --build
+```
+
+Esto levantará:
+- una base de datos PostgreSQL con el esquema de `database/pandea_schema.sql`
+- el backend en `http://localhost:4000`
+- el frontend en `http://localhost:5173`
+
+> Nota: el frontend también está incluido en el `docker-compose`.
 
 ---
 
@@ -152,11 +168,11 @@ El repositorio también incluye un workflow de GitHub Actions en `.github/workfl
 
 - `PORT`: puerto del servidor backend.
 - `JWT_SECRET`: clave secreta para firmar tokens JWT.
-- `DB_SERVER`: host de SQL Server.
-- `DB_USER`: usuario SQL.
-- `DB_PASSWORD`: contraseña SQL.
+- `DB_SERVER`: host de PostgreSQL.
+- `DB_USER`: usuario de PostgreSQL.
+- `DB_PASSWORD`: contraseña de PostgreSQL.
 - `DB_NAME`: nombre de la base de datos.
-- `DB_PORT`: puerto SQL Server.
+- `DB_PORT`: puerto de PostgreSQL.
 - `WHATSAPP_NUMBER`: número de WhatsApp usado en la app.
 - `NODE_ENV`: modo de ejecución.
 
@@ -246,7 +262,7 @@ El repositorio también incluye un workflow de GitHub Actions en `.github/workfl
 - El frontend usa el token almacenado en `localStorage` para autorizar solicitudes.
 - El backend usa JWT con firma y expiración de 7 días.
 - Las operaciones admin están protegidas con middleware que valida `rol === 'admin'`.
-- La base de datos SQL Server se crea y se gestiona por `database/pandea_schema.sql`.
+- La base de datos PostgreSQL se crea y se gestiona por `database/pandea_schema.sql`.
 
 ---
 
@@ -258,7 +274,7 @@ El repositorio también incluye un workflow de GitHub Actions en `.github/workfl
 - Validación de pedidos con cupones
 - Panel admin con estadísticas
 - Frontend SPA en React con rutas protegidas
-- Conexión segura a SQL Server con `mssql`
+- Conexión segura a PostgreSQL con `pg`
 
 ---
 
@@ -274,6 +290,6 @@ El repositorio también incluye un workflow de GitHub Actions en `.github/workfl
 ## 📌 Próximos pasos sugeridos
 
 - Añadir UI de administración avanzada: edición de cupones y usuarios.
-- Crear `docker-compose` para backend + SQL Server + frontend.
+- Crear `docker-compose` para backend + PostgreSQL + frontend.
 - Agregar pruebas unitarias e integración.
 - Añadir un flujo real de pago / pasarela.

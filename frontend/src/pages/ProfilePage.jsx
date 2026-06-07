@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useNavigate, Link } from 'react-router-dom';
 import { getProfile, updateProfile, getMyOrders } from '../services/userService.js';
 
 export default function ProfilePage() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState(user || {});
   const [orders, setOrders] = useState([]);
   const [editing, setEditing] = useState(false);
@@ -95,23 +97,15 @@ export default function ProfilePage() {
           </div>
         </form>
         <div className="card">
-          <h2>Pedidos recientes</h2>
-          {orders.length === 0 ? (
-            <p>No tienes pedidos aún.</p>
-          ) : (
-            <div className="grid" style={{ gap: '1rem' }}>
-              {orders.map((order) => (
-                <div key={order.id} className="card">
-                  <p><strong>Orden #{order.id}</strong></p>
-                  <p className="small-text">Estado: {order.estado}</p>
-                  <p>Total: ${Number(order.total).toFixed(2)}</p>
-                </div>
-              ))}
-            </div>
-          )}
-          <button type="button" className="button-danger" onClick={logout}>
-            Cerrar sesión
-          </button>
+          <h2>Opciones</h2>
+          <div style={{ display: 'grid', gap: '0.75rem' }}>
+            <Link to="/profile/historial" className="button-secondary" style={{ display: 'block', textAlign: 'center' }}>
+              Ver Historial Completo
+            </Link>
+            <button type="button" className="button-danger" onClick={() => { logout(); navigate('/'); }}>
+              Cerrar sesión
+            </button>
+          </div>
         </div>
       </div>
     </section>

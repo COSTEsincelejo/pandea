@@ -1,7 +1,6 @@
 const orderModel = require('../models/orderModel');
 const productModel = require('../models/productModel');
 const couponModel = require('../models/couponModel');
-const { query } = require('../config/db');
 
 async function createOrder(payload) {
   const couponCode = payload.couponCode || null;
@@ -67,4 +66,10 @@ async function createOrder(payload) {
 
 module.exports = {
   createOrder,
+  getOrdersByUser: (userId) => orderModel.getOrdersByClient(userId),
+  getOrderById: (id) => orderModel.getOrderById(id),
+  getAllOrders: (limit, offset) => orderModel.getAllOrders(limit, offset),
+  getOrderStats: (days) => orderModel.getOrderStats(days),
+  getTopProducts: (limit) => orderModel.getTopProducts(limit),
+  updateOrderStatus: (id, status) => orderModel.updateOrderStatus(id, status),
 };
