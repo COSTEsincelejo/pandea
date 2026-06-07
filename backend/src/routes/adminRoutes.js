@@ -16,7 +16,7 @@ router.put('/users/:id/role', [param('id').isInt().withMessage('ID inválido'), 
 router.get('/products', adminController.getProducts);
 router.post('/products', [
   body('nombre').notEmpty(),
-  body('categoria').notEmpty(),
+  // body('categoria').notEmpty(),
   body('precio').isFloat({ gt: 0 }),
 ], adminController.createProduct);
 router.put('/products/:id', [param('id').isInt().withMessage('ID inválido')], adminController.updateProduct);
