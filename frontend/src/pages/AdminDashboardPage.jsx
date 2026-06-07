@@ -87,7 +87,7 @@ export default function AdminDashboardPage() {
       default:
         return renderStats();
     }
-  }, [activeTab, stats, users, products, orders, coupons, activity, message]);
+  }, [activeTab, stats, users, products, orders, coupons, activity, message, productForm, couponForm, editingProductId, editingCouponId]);
 
   function handleProductChange(event) {
     const { name, value, type, checked } = event.target;
